@@ -1,0 +1,399 @@
+{% extends "base.html" %}
+
+{% block extra_styles %}
+    <style>
+        .add-form {
+            background-color: rgba(30, 32, 48, 0.7);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--subtext1);
+        }
+
+        .bookmarks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .bookmark-card {
+            background-color: rgba(30, 32, 48, 0.7);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .bookmark-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .bookmark-card.completed {
+            background-color: rgba(36, 39, 58, 0.7);
+        }
+
+        .bookmark-content {
+            padding: 1rem;
+        }
+
+        .bookmark-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .bookmark-favicon {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+        }
+
+        .bookmark-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text);
+            text-decoration: none;
+            word-break: break-word;
+        }
+
+        .bookmark-thumbnail {
+            width: 100%;
+            height: 168px;
+            object-fit: cover;
+            background-color: var(--surface1);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .youtube-thumbnail {
+            position: relative;
+        }
+
+        .youtube-thumbnail::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 0, 0, 0.8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .youtube-thumbnail::before {
+            content: '\f04b';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            z-index: 1;
+        }
+
+        .bookmark-note {
+            color: var(--subtext0);
+            margin: 0.75rem 0;
+            font-size: 0.9rem;
+        }
+
+        .bookmark-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        .bookmark-card.completed .bookmark-meta {
+            background-color: rgba(54, 58, 79, 0.7);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .bookmark-card.completed .bookmark-type {
+            background-color: var(--green);
+            color: var(--base);
+        }
+
+        .bookmark-card.completed .action-button {
+            color: var(--green);
+        }
+
+        .bookmark-card.completed .action-button:hover {
+            color: var(--green);
+            opacity: 0.8;
+        }
+
+        .completed .toggle-button {
+            color: var(--green);
+        }
+
+        .bookmark-type {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            background-color: var(--surface1);
+            color: var(--subtext1);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .bookmark-type:hover {
+            background-color: var(--surface2);
+        }
+
+        .bookmark-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-button {
+            background: none;
+            border: none;
+            padding: 0.5rem;
+            cursor: pointer;
+            color: var(--overlay0);
+            transition: color 0.2s;
+        }
+
+        .action-button:hover {
+            color: var(--text);
+        }
+
+        .completed {
+            color: var(--green);
+        }
+
+        .search-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .search-input {
+            flex: 1;
+        }
+
+        .no-results {
+            text-align: center;
+            color: var(--subtext0);
+            padding: 2rem;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search bookmarks..." value="{{ request.args.get('q', '') }}">
+    </div>
+
+    <div class="add-form">
+        <form id="addForm" onsubmit="return addBookmark(event)">
+            <div class="search-bar">
+                <input type="url" id="urlInput" placeholder="Enter URL" required>
+                <input type="text" id="noteInput" placeholder="Add some notes (optional)">
+                <button type="submit">Add</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="auth-buttons" style="text-align: right; margin-bottom: 1rem;">
+        {% if is_authenticated %}
+            <a href="{{ url_for('logout') }}" style="color: var(--pink); text-decoration: none;">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        {% else %}
+            <a href="{{ url_for('login') }}" style="color: var(--pink); text-decoration: none;">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </a>
+        {% endif %}
+    </div>
+
+    <div class="bookmarks-grid">
+        {% for bookmark in bookmarks %}
+            <div class="bookmark-card {% if bookmark.completed %}completed{% endif %}" data-id="{{ bookmark.id }}">
+                {% if bookmark.thumbnail %}
+                    <div class="{% if bookmark.type == 'youtube' %}youtube-thumbnail{% endif %}">
+                        <img src="{{ bookmark.thumbnail }}" alt="{{ bookmark.title }}" class="bookmark-thumbnail" onerror="this.src='https://via.placeholder.com/300x168/363a4f/6e738d?text=No+Thumbnail'">
+                    </div>
+                {% endif %}
+                <div class="bookmark-content">
+                    <div class="bookmark-header">
+                        {% if bookmark.favicon %}
+                            <img src="{{ bookmark.favicon }}" alt="" class="bookmark-favicon">
+                        {% elif bookmark.type == 'note' %}
+                            <i class="fas fa-sticky-note" style="color: var(--yellow)"></i>
+                        {% else %}
+                            <i class="fas fa-link" style="color: var(--blue)"></i>
+                        {% endif %}
+                        {% if bookmark.url %}
+                            <a href="{{ bookmark.url }}" target="_blank" class="bookmark-title">{{ bookmark.title }}</a>
+                        {% else %}
+                            <span class="bookmark-title">{{ bookmark.title }}</span>
+                        {% endif %}
+                    </div>
+                    {% if bookmark.note %}
+                        <div class="bookmark-note">{{ bookmark.note }}</div>
+                    {% endif %}
+                    <div class="bookmark-meta">
+                        <span class="bookmark-type" onclick="filterByDomain('{{ bookmark.url }}')">
+                            {% if bookmark.type == 'youtube' %}
+                                youtube.com
+                            {% elif bookmark.type == 'note' %}
+                                Note
+                            {% else %}
+                                {{ urlparse(bookmark.url).netloc }}
+                            {% endif %}
+                        </span>
+                        <div class="bookmark-actions">
+                            {% if is_authenticated %}
+                            <button class="action-button toggle-button {% if bookmark.completed %}completed{% endif %}" onclick="toggleBookmark({{ bookmark.id }})">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="action-button" onclick="deleteBookmark({{ bookmark.id }})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="no-results">
+                <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 1rem; color: var(--overlay0)"></i>
+                <p>No bookmarks found</p>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        const searchInput = document.getElementById('searchInput');
+        let searchTimeout;
+
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const query = searchInput.value.trim();
+                const url = new URL(window.location);
+                if (query) {
+                    url.searchParams.set('q', query);
+                } else {
+                    url.searchParams.delete('q');
+                }
+                window.location = url;
+            }, 500);
+        });
+
+        function showToast(message, duration = 3000) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, duration);
+        }
+
+        async function addBookmark(event) {
+            event.preventDefault();
+            const urlInput = document.getElementById('urlInput');
+            const noteInput = document.getElementById('noteInput');
+            
+            const url = urlInput.value.trim();
+            const note = noteInput.value.trim();
+            
+            if (!url) {
+                showToast('Please enter a URL');
+                return;
+            }
+
+            try {
+                const response = await fetch('/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ url, note })
+                });
+
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    showToast('Error adding bookmark');
+                }
+            } catch (error) {
+                showToast('Error adding bookmark');
+            }
+        }
+
+        async function toggleBookmark(id) {
+            try {
+                const response = await fetch(`/toggle/${id}`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    showToast('Error toggling bookmark');
+                }
+            } catch (error) {
+                showToast('Error toggling bookmark');
+            }
+        }
+
+        async function deleteBookmark(id) {
+            if (confirm('Are you sure you want to delete this bookmark?')) {
+                try {
+                    const response = await fetch(`/delete/${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        showToast('Error deleting bookmark');
+                    }
+                } catch (error) {
+                    showToast('Error deleting bookmark');
+                }
+            }
+        }
+
+        function filterByDomain(domain) {
+            window.location.href = `/?domain=${domain}`;
+        }
+    </script>
+{% endblock %} 

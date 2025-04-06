@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="login-container" style="max-width: 400px; margin: 4rem auto;">
+    <div class="login-form" style="background-color: rgba(30, 32, 48, 0.7); padding: 2rem; border-radius: 12px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);">
+        <h2 style="color: var(--pink); margin-bottom: 1.5rem; text-align: center;">Login to Numan Vault</h2>
+        {% if error %}
+        <div style="color: var(--red); margin-bottom: 1rem; text-align: center;">{{ error }}</div>
+        {% endif %}
+        <form method="POST" action="{{ url_for('login') }}">
+            <div style="margin-bottom: 1rem;">
+                <input type="text" name="username" placeholder="Username" required style="width: 100%;">
+            </div>
+            <div style="margin-bottom: 1.5rem;">
+                <input type="password" name="password" placeholder="Password" required style="width: 100%;">
+            </div>
+            <button type="submit" style="width: 100%;">Login</button>
+        </form>
+    </div>
+</div>
+{% endblock %} 

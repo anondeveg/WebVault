@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            width: 300px;
+            padding: 15px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #181926;
+            color: #cad3f5;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #363a4f;
+            background-color: #1e2030;
+            color: #cad3f5;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #f5bde6;
+            color: #181926;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #c6a0f6;
+        }
+
+        .status {
+            margin-top: 10px;
+            padding: 8px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .success {
+            background-color: rgba(166, 218, 149, 0.2);
+            color: #a6da95;
+            border: 1px solid #a6da95;
+        }
+
+        .error {
+            background-color: rgba(237, 135, 150, 0.2);
+            color: #ed8796;
+            border: 1px solid #ed8796;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <input type="text" id="noteInput" placeholder="Add a note (optional)">
+        <button id="addButton">Add to Numan Vault</button>
+        <div id="status" class="status"></div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html> 
